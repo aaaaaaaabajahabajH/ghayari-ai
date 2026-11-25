@@ -1,11 +1,12 @@
 import { createBrowserClient } from "@supabase/ssr";
+import { supabaseAnonKey, supabaseUrl } from "@/lib/supabase/env";
 
 let browserClient: ReturnType<typeof createBrowserClient> | undefined;
 
 export function createClient() {
   browserClient ??= createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     { cookieOptions: { secure: process.env.NODE_ENV === "production" } },
   );
 

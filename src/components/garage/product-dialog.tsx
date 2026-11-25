@@ -5,8 +5,6 @@ import { X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { productCategories } from "@/lib/types";
 
-const supabase = createClient();
-
 type ProductDialogProps = {
   onClose: () => void;
   onSaved: () => void;
@@ -21,6 +19,7 @@ export function ProductDialog({ onClose, onSaved }: ProductDialogProps) {
     setBusy(true);
     setError("");
     const form = new FormData(event.currentTarget);
+    const supabase = createClient();
     const { error: insertError } = await supabase.rpc("create_garage_product", {
       p_sku: String(form.get("sku")).trim().toUpperCase(),
       p_name: String(form.get("name")).trim(),

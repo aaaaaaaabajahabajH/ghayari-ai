@@ -6,8 +6,6 @@ import { ArrowLeft, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { Brand } from "@/components/garage/brand";
 
-const supabase = createClient();
-
 function friendlyAuthError(message: string) {
   if (message.toLowerCase().includes("invalid login credentials")) return "البريد الإلكتروني أو كلمة المرور غير صحيحة.";
   if (message.toLowerCase().includes("email not confirmed")) return "أكّد بريدك الإلكتروني من رسالة التفعيل، ثم سجّل الدخول.";
@@ -29,6 +27,7 @@ export function AuthPanel() {
     setBusy(true);
     setError("");
     setNotice("");
+    const supabase = createClient();
 
     if (mode === "signup") {
       const { data, error: authError } = await supabase.auth.signUp({
