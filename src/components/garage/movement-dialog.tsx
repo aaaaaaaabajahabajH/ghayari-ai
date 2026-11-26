@@ -5,8 +5,6 @@ import { ArrowDownToLine, ArrowUpFromLine, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { GarageProduct } from "@/lib/types";
 
-const supabase = createClient();
-
 type MovementDialogProps = {
   products: GarageProduct[];
   initialProductId?: string;
@@ -24,6 +22,7 @@ export function MovementDialog({ products, initialProductId, onClose, onSaved }:
     setBusy(true);
     setError("");
     const form = new FormData(event.currentTarget);
+    const supabase = createClient();
     const { error: rpcError } = await supabase.rpc("record_stock_movement", {
       p_product_id: String(form.get("product_id")),
       p_movement_type: movementType,

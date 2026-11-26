@@ -7,17 +7,22 @@ import { createClient } from "@/lib/supabase/client";
 import { AuthPanel } from "@/components/garage/auth-panel";
 import { GarageDashboard } from "@/components/garage/garage-dashboard";
 
-const supabase = createClient();
+let supabase: ReturnType<typeof createClient> | undefined;
+
+function getSupabase() {
+  supabase ??= createClient();
+  return supabase;
+}
 
 export function GarageApp() {
   const { data: user, isLoading, mutate } = useSWR("garage-user", async () => {
-    const { data, error } = await supabase.auth.getUser();
+    const { data, error } = await getSupabase().auth.getUser();
     if (error && error.name !== "AuthSessionMissingError") throw error;
     return data.user;
   });
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
+    const { data: { subscription } } = getSupabase().auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
       void mutate(session?.user ?? null, false);
     });
     return () => subscription.unsubscribe();

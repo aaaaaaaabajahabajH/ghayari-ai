@@ -33,7 +33,13 @@ import { Brand } from "@/components/garage/brand";
 import { ProductDialog } from "@/components/garage/product-dialog";
 import { MovementDialog } from "@/components/garage/movement-dialog";
 
-const supabase = createClient();
+let supabase: ReturnType<typeof createClient> | undefined;
+
+function getSupabase() {
+  supabase ??= createClient();
+  return supabase;
+}
+
 const EMPTY_PRODUCTS: GarageProduct[] = [];
 type DashboardData = { products: GarageProduct[]; movements: StockMovement[] };
 type Section = "overview" | "products" | "movements";
@@ -73,11 +79,11 @@ export function GarageDashboard({ user }: { user: User }) {
 
   const { data, error, isLoading, mutate } = useSWR<DashboardData>(
     ["garage-dashboard", user.id],
-    async () => {
-      const [productsResult, movementsResult] = await Promise.all([
-        supabase.from("garage_products").select("id,owner_id,sku,name,category,compatibility,quantity,min_quantity,unit_cost,created_at,updated_at").order("updated_at", { ascending: false }),
-        supabase.from("garage_stock_movements").select("id,product_id,movement_type,quantity,reference,notes,created_at,product:garage_products(name,sku)").order("created_at", { ascending: false }),
-      ]);
+      async () => {
+        const [productsResult, movementsResult] = await Promise.all([
+          getSupabase().from("garage_products").select("id,owner_id,sku,name,category,compatibility,quantity,min_quantity,unit_cost,created_at,updated_at").order("updated_at", { ascending: false }),
+          getSupabase().from("garage_stock_movements").select("id,product_id,movement_type,quantity,reference,notes,created_at,product:garage_products(name,sku)").order("created_at", { ascending: false }),
+        ]);
       if (productsResult.error) throw productsResult.error;
       if (movementsResult.error) throw movementsResult.error;
       return { products: (productsResult.data ?? []) as GarageProduct[], movements: (movementsResult.data ?? []) as unknown as StockMovement[] };
@@ -102,7 +108,7 @@ export function GarageDashboard({ user }: { user: User }) {
 
   async function signOut() {
     setSigningOut(true);
-    const { error: signOutError } = await supabase.auth.signOut();
+    const { error: signOutError } = await getSupabase().auth.signOut();
     if (signOutError) showToast("تعذر تسجيل الخروج. حاول مجددًا.", true);
     setSigningOut(false);
   }
